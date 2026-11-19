@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas de músculos del cuerpo humano</title>
+<style>
+:root{--bg:#faf7f2;--ink:#1f1d1b;--mut:#6b655e;--card:#fff;--line:#e6dfd5;--skin:#f1dccb;--skinS:#d9bba3;--mus:#c4554a;--musH:#e0402f;--sel:#f2b705;--deep:#5a6fb0}
+@media (prefers-color-scheme:dark){:root{--bg:#171513;--ink:#f1ece6;--mut:#a79f95;--card:#211e1b;--line:#35302b;--skin:#4a3c33;--skinS:#6b574a;--mus:#b5483e;--musH:#ef5a48;--sel:#f2c12e;--deep:#8a9ee0}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{padding:20px 16px 8px;max-width:980px;margin:auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+header p{margin:0;color:var(--mut);font-size:.92rem}
+main{max-width:980px;margin:auto;padding:8px 16px 40px}
+.bodies{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.view{text-align:center}
+.view h3{margin:0;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+svg{width:100%;height:auto;max-height:70vh;touch-action:manipulation}
+.sil{fill:var(--skin);stroke:var(--skinS);stroke-width:.6}
+.m{fill:var(--mus);fill-opacity:.78;stroke:var(--bg);stroke-width:.4;cursor:pointer;transition:fill .15s}
+.m:hover{fill:var(--musH)}
+.m.deep{fill:var(--deep);fill-opacity:.35;stroke:var(--deep);stroke-width:.6;stroke-dasharray:1.5 1;display:none;pointer-events:none}
+.showdeep .m.deep{display:inline}
+.m.on{fill:var(--sel)!important;fill-opacity:.95!important;stroke:#000;stroke-width:.8;display:inline!important}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+input[type=search]{flex:1;min-width:180px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1rem}
+label.tg{font-size:.88rem;color:var(--mut);display:flex;gap:6px;align-items:center}
+#info{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--sel);border-radius:12px;padding:12px 14px;margin:12px 0;min-height:64px}
+#info h2{margin:0 0 4px;font-size:1.15rem}
+#info .tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:99px;background:var(--line);color:var(--mut);margin-right:4px}
+#info p{margin:6px 0 0;font-size:.93rem}
+.empty{color:var(--mut);font-size:.92rem}
+.region h2{font-size:1.05rem;margin:22px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:.88rem}
+.card:hover,.card.on{border-color:var(--sel);box-shadow:0 0 0 2px var(--sel) inset}
+.card b{display:block;font-size:.95rem;margin-bottom:2px}
+.card .d{font-size:.7rem;color:var(--deep);font-weight:600}
+.card p{margin:3px 0 0;color:var(--mut)}
+.legend{display:flex;gap:14px;font-size:.78rem;color:var(--mut);margin-top:6px;justify-content:center;flex-wrap:wrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+#qr{display:flex;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:28px}
+#qr .code{background:#fff;padding:8px;border-radius:8px;width:150px;flex:none}
+#qr .code svg{max-height:none}
+#qr p{margin:4px 0;font-size:.9rem;color:var(--mut)}
+footer{max-width:980px;margin:auto;padding:0 16px 30px;font-size:.78rem;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+<h1>Atlas de músculos del cuerpo humano</h1>
+<p>Tocá un músculo en el cuerpo o en la lista para ver su nombre, ubicación y función. Los músculos se marcan en ambos lados del cuerpo.</p>
+</header>
+<main>
+<div class="bodies" id="bodies">
+  <div class="view"><h3>Vista anterior</h3><svg id="svgF" viewBox="20 0 160 440" aria-label="Vista anterior"></svg></div>
+  <div class="view"><h3>Vista posterior</h3><svg id="svgB" viewBox="20 0 160 440" aria-label="Vista posterior"></svg></div>
+</div>
+<div class="legend"><span><i class="dot" style="background:var(--mus)"></i>Superficial</span><span><i class="dot" style="background:var(--deep);opacity:.6"></i>Profundo (punteado)</span><span><i class="dot" style="background:var(--sel)"></i>Seleccionado</span></div>
+
+<div id="info"><span class="empty">Seleccioná un músculo…</span></div>
+
+<div class="controls">
+  <input type="search" id="q" placeholder="Buscar músculo (ej. bíceps, glúteo)…">
+  <label class="tg"><input type="checkbox" id="deep"> Mostrar profundos</label>
+</div>
+<div id="list"></div>
+
+
+</main>
+<footer>Esquema simplificado con fines de estudio: las formas indican la ubicación aproximada, no la anatomía exacta. Incluye los ~85 músculos principales.</footer>
+
+<script>
+// shape: [view, cx, cy, rx, ry, rot]  or [view, "path"]. Coordenadas del lado izquierdo de la imagen; se reflejan (m:0 = músculo único en la línea media)
+const R={cab:"Cabeza y cara",cue:"Cuello",esp:"Espalda",tor:"Tórax y hombro",abd:"Abdomen",bra:"Brazo y antebrazo",man:"Mano",mus:"Cadera y muslo",pie:"Pierna y pie"};
+const M=[
+// CABEZA
+{n:"Frontal (occipitofrontal)",r:"cab",s:[["f",92,15,7,5,0]],u:"Frente, desde la aponeurosis del cuero cabelludo hasta la piel de las cejas.",f:"Eleva las cejas y arruga la frente."},
+{n:"Occipital",r:"cab",s:[["b",93,22,6,4,0]],u:"Parte posterior del cráneo, sobre el hueso occipital.",f:"Tira el cuero cabelludo hacia atrás."},
+{n:"Temporal",r:"cab",s:[["f",84,22,3.5,7,0],["b",84,26,3.5,7,0]],u:"Lado de la cabeza (fosa temporal) hasta la apófisis coronoides de la mandíbula.",f:"Cierra la mandíbula y la lleva hacia atrás."},
+{n:"Orbicular del ojo",r:"cab",s:[["f",92,27,5,3.5,0]],u:"Rodea la órbita del ojo.",f:"Cierra los párpados (parpadear, guiñar)."},
+{n:"Cigomático mayor",r:"cab",s:[["f",88,36,1.8,5,-35]],u:"Del hueso cigomático (pómulo) a la comisura de la boca.",f:"Lleva la comisura hacia arriba y afuera: sonreír."},
+{n:"Orbicular de la boca",r:"cab",m:0,s:[["f",100,42,6,2.5,0]],u:"Rodea los labios.",f:"Cierra y frunce los labios (besar, silbar)."},
+{n:"Masetero",r:"cab",s:[["f",85,40,3.2,6,0]],u:"Del arco cigomático al ángulo de la mandíbula.",f:"Músculo principal para masticar: eleva la mandíbula."},
+{n:"Buccinador",r:"cab",d:1,s:[["f",90,41,3,2.5,0]],u:"Pared de la mejilla, profundo al masetero.",f:"Comprime las mejillas (soplar, mantener el alimento entre los dientes)."},
+// CUELLO
+{n:"Esternocleidomastoideo",r:"cue",s:[["f",92,58,2.8,10,-28]],u:"Del esternón y la clavícula a la apófisis mastoides (detrás de la oreja).",f:"Gira la cabeza al lado opuesto y flexiona el cuello."},
+{n:"Platisma",r:"cue",d:1,s:[["f",92,66,9,6,0]],u:"Lámina delgada bajo la piel del cuello, de la mandíbula al pecho.",f:"Tensa la piel del cuello y baja la comisura de la boca."},
+{n:"Esternohioideo",r:"cue",s:[["f",97,60,1.6,7,0]],u:"Del esternón al hueso hioides, en la parte frontal del cuello.",f:"Desciende el hioides al tragar y hablar."},
+{n:"Digástrico",r:"cue",d:1,s:[["f",93,50,6,1.8,10]],u:"Bajo la mandíbula, entre la mastoides y el mentón.",f:"Abre la boca y eleva el hioides."},
+{n:"Escalenos",r:"cue",d:1,s:[["f",87,60,2.5,6,-20]],u:"De las vértebras cervicales a las primeras costillas.",f:"Inclinan el cuello y elevan las costillas al respirar."},
+{n:"Esplenio de la cabeza",r:"cue",d:1,s:[["b",94,56,3.5,8,-15]],u:"Nuca, de las vértebras cervicales/torácicas al cráneo.",f:"Extiende y gira la cabeza."},
+// ESPALDA
+{n:"Trapecio",r:"esp",s:[["b","M100,50 L90,60 L64,74 L70,82 L88,98 L100,150 Z"]],u:"Espalda alta y nuca: del occipital y vértebras a la clavícula y escápula.",f:"Eleva, retrae y desciende la escápula (encoger los hombros)."},
+{n:"Elevador de la escápula",r:"esp",d:1,s:[["b",83,66,2.2,8,35]],u:"De las vértebras cervicales al ángulo superior de la escápula.",f:"Eleva la escápula."},
+{n:"Romboides (mayor y menor)",r:"esp",d:1,s:[["b",89,100,5,11,22]],u:"Entre la columna y el borde medial de la escápula, bajo el trapecio.",f:"Retrae la escápula (juntar los omóplatos)."},
+{n:"Supraespinoso",r:"esp",d:1,s:[["b",78,80,9,2.6,10]],u:"Fosa supraespinosa de la escápula al húmero. Parte del manguito rotador.",f:"Inicia la abducción del brazo."},
+{n:"Infraespinoso",r:"esp",s:[["b",78,96,8,7,0]],u:"Fosa infraespinosa de la escápula al húmero. Manguito rotador.",f:"Rotación externa del brazo."},
+{n:"Redondo menor",r:"esp",s:[["b",69,105,5,2.2,-30]],u:"Borde lateral de la escápula al húmero. Manguito rotador.",f:"Rotación externa del brazo."},
+{n:"Redondo mayor",r:"esp",s:[["b",72,113,7,3,-25]],u:"Ángulo inferior de la escápula al húmero.",f:"Aduce y rota internamente el brazo."},
+{n:"Dorsal ancho",r:"esp",s:[["b","M100,150 L100,192 L86,196 L70,172 L64,124 L74,120 L90,113 Z"]],u:"Espalda media y baja, de la columna y cresta ilíaca al húmero.",f:"Extiende, aduce y rota internamente el brazo (dominadas, remar)."},
+{n:"Erector de la columna",r:"esp",d:1,s:[["b",93,165,4.5,32,0]],u:"A lo largo de la columna, de la pelvis al cráneo.",f:"Extiende y mantiene erguida la columna."},
+{n:"Multífidos",r:"esp",d:1,s:[["b",98,160,1.8,32,0]],u:"Pegados a las vértebras, profundos al erector.",f:"Estabilizan las vértebras."},
+{n:"Cuadrado lumbar",r:"esp",d:1,s:[["b",86,182,4.5,9,0]],u:"Entre la última costilla y la cresta ilíaca.",f:"Inclina el tronco al lado y fija la 12.ª costilla."},
+// TÓRAX Y HOMBRO
+{n:"Deltoides",r:"tor",s:[["f",64,86,8,13,18],["b",64,86,8,13,18]],u:"Cubre el hombro: de la clavícula y la escápula al húmero.",f:"Abduce el brazo; sus fibras anteriores y posteriores lo flexionan y extienden."},
+{n:"Pectoral mayor",r:"tor",s:[["f","M100,78 L78,76 L68,88 L72,100 L86,110 L100,108 Z"]],u:"Pecho, de la clavícula y el esternón al húmero.",f:"Aduce y rota internamente el brazo; empujar."},
+{n:"Pectoral menor",r:"tor",d:1,s:[["f",80,92,5,9,-30]],u:"Bajo el pectoral mayor, de las costillas 3-5 a la apófisis coracoides.",f:"Baja y lleva adelante la escápula."},
+{n:"Subclavio",r:"tor",d:1,s:[["f",84,76,8,1.6,0]],u:"Debajo de la clavícula.",f:"Estabiliza la clavícula."},
+{n:"Subescapular",r:"tor",d:1,s:[["f",74,100,5,9,-10]],u:"Cara anterior de la escápula (contra las costillas). Manguito rotador.",f:"Rotación interna del brazo."},
+{n:"Serrato anterior",r:"tor",s:[["f",71,122,4.5,11,0]],u:"Costado del tórax, de las costillas 1-8 al borde medial de la escápula.",f:"Lleva la escápula hacia adelante (dar un puñetazo)."},
+{n:"Intercostales",r:"tor",d:1,s:[["f",84,118,9,10,0]],u:"Entre las costillas.",f:"Mueven las costillas al respirar."},
+{n:"Diafragma",r:"tor",d:1,m:0,s:[["f",100,132,26,5,0]],u:"Cúpula que separa el tórax del abdomen.",f:"Principal músculo de la inspiración."},
+// ABDOMEN
+{n:"Recto del abdomen",r:"abd",s:[["f",93,150,5.5,31,0]],u:"Frente del abdomen, del pubis al esternón y costillas 5-7 (el \"six pack\").",f:"Flexiona el tronco (abdominales)."},
+{n:"Oblicuo externo",r:"abd",s:[["f",79,158,8,21,0]],u:"Costados del abdomen, de las costillas a la cresta ilíaca y línea alba.",f:"Rota e inclina el tronco; comprime el abdomen."},
+{n:"Oblicuo interno",r:"abd",d:1,s:[["f",81,166,7,14,0]],u:"Bajo el oblicuo externo, fibras en sentido contrario.",f:"Rota el tronco al mismo lado; comprime el abdomen."},
+{n:"Transverso del abdomen",r:"abd",d:1,s:[["f",85,171,9,11,0]],u:"Capa más profunda del abdomen, fibras horizontales.",f:"Comprime el abdomen como una faja."},
+// BRAZO Y ANTEBRAZO
+{n:"Bíceps braquial",r:"bra",s:[["f",55,120,5.5,21,10]],u:"Cara anterior del brazo, de la escápula al radio.",f:"Flexiona el codo y supina el antebrazo."},
+{n:"Braquial",r:"bra",s:[["f",48,146,3.2,9,10]],u:"Profundo al bíceps, del húmero al cúbito.",f:"Principal flexor del codo."},
+{n:"Coracobraquial",r:"bra",d:1,s:[["f",61,104,2.5,9,8]],u:"De la apófisis coracoides al húmero, cara interna del brazo.",f:"Flexiona y aduce el brazo."},
+{n:"Tríceps braquial",r:"bra",s:[["b",54,122,6.5,23,10]],u:"Cara posterior del brazo, de la escápula y el húmero al olécranon.",f:"Extiende el codo."},
+{n:"Ancóneo",r:"bra",s:[["b",52,165,2.3,4,0]],u:"Detrás del codo, del epicóndilo al cúbito.",f:"Ayuda a extender el codo."},
+{n:"Braquiorradial",r:"bra",s:[["f",43,178,3.5,15,10]],u:"Borde lateral (del pulgar) del antebrazo, del húmero al radio.",f:"Flexiona el codo con la mano en posición neutra."},
+{n:"Pronador redondo",r:"bra",s:[["f",51,168,2.2,8,-40]],u:"Cara anterior del antebrazo, del epicóndilo medial al radio.",f:"Prona el antebrazo (palma hacia abajo)."},
+{n:"Flexor radial del carpo",r:"bra",s:[["f",47,193,2,17,8]],u:"Antebrazo anterior, del epicóndilo medial a la base del 2.º metacarpiano.",f:"Flexiona la muñeca y la inclina hacia el pulgar."},
+{n:"Palmar largo",r:"bra",s:[["f",50.5,195,1.8,16,6]],u:"Centro del antebrazo anterior hasta la aponeurosis palmar (falta en ~15% de personas).",f:"Flexiona la muñeca."},
+{n:"Flexor cubital del carpo",r:"bra",s:[["f",54,190,2,18,6]],u:"Borde medial (del meñique) del antebrazo, hasta el pisiforme.",f:"Flexiona la muñeca y la inclina hacia el meñique."},
+{n:"Flexor superficial de los dedos",r:"bra",d:1,s:[["f",49,205,4,13,8]],u:"Bajo los flexores superficiales del antebrazo, hasta las falanges medias.",f:"Flexiona los dedos."},
+{n:"Flexor profundo de los dedos",r:"bra",d:1,s:[["f",48,212,3,11,8]],u:"Capa profunda del antebrazo, hasta las falanges distales.",f:"Flexiona las puntas de los dedos."},
+{n:"Pronador cuadrado",r:"bra",d:1,s:[["f",44,226,4,1.8,0]],u:"Parte distal del antebrazo, entre cúbito y radio.",f:"Prona el antebrazo."},
+{n:"Supinador",r:"bra",d:1,s:[["b",46,172,2.5,5,-30]],u:"Parte proximal del antebrazo posterior, rodea el radio.",f:"Supina el antebrazo (palma hacia arriba)."},
+{n:"Extensor radial largo del carpo",r:"bra",s:[["b",42,180,2.2,13,10]],u:"Borde lateral del antebrazo posterior, al 2.º metacarpiano.",f:"Extiende la muñeca y la inclina hacia el pulgar."},
+{n:"Extensor radial corto del carpo",r:"bra",s:[["b",44.5,195,2,12,8]],u:"Antebrazo posterior, al 3.er metacarpiano.",f:"Extiende la muñeca (implicado en el \"codo de tenista\")."},
+{n:"Extensor de los dedos",r:"bra",s:[["b",48,195,2.3,17,8]],u:"Centro del antebrazo posterior, hasta los dedos 2-5.",f:"Extiende los dedos y la muñeca."},
+{n:"Extensor cubital del carpo",r:"bra",s:[["b",52.5,193,2,17,7]],u:"Borde medial del antebrazo posterior, al 5.º metacarpiano.",f:"Extiende la muñeca y la inclina hacia el meñique."},
+{n:"Abductor largo del pulgar",r:"bra",s:[["b",42,215,1.8,6,30]],u:"Parte distal del antebrazo posterior, al 1.er metacarpiano.",f:"Separa y extiende el pulgar."},
+// MANO
+{n:"Eminencia tenar",r:"man",s:[["f",39,244,3,6,10]],u:"Base del pulgar en la palma (abductor corto, flexor corto y oponente del pulgar).",f:"Mueve el pulgar; permite la oposición (pinza)."},
+{n:"Eminencia hipotenar",r:"man",s:[["f",48,247,2.5,6,0]],u:"Borde del meñique en la palma.",f:"Mueve el meñique."},
+{n:"Lumbricales e interóseos",r:"man",d:1,s:[["f",43,253,4,5,0],["b",43,253,4,5,0]],u:"Entre los metacarpianos de la mano.",f:"Flexionan los nudillos, extienden los dedos y los separan/juntan."},
+// CADERA Y MUSLO
+{n:"Iliopsoas (psoas e ilíaco)",r:"mus",d:1,s:[["f",86,198,5,15,-15]],u:"De la columna lumbar y la fosa ilíaca al trocánter menor del fémur.",f:"Principal flexor de la cadera."},
+{n:"Glúteo mayor",r:"mus",s:[["b",83,212,14,15,0]],u:"Nalga, del ilion y el sacro al fémur.",f:"Extiende la cadera (subir escaleras, levantarse)."},
+{n:"Glúteo medio",r:"mus",s:[["b",76,193,9,6,-10]],u:"Parte superior-lateral de la cadera, al trocánter mayor.",f:"Abduce la cadera y estabiliza la pelvis al caminar."},
+{n:"Glúteo menor",r:"mus",d:1,s:[["b",76,197,6,4.5,-10]],u:"Bajo el glúteo medio.",f:"Abduce y rota internamente la cadera."},
+{n:"Piriforme",r:"mus",d:1,s:[["b",85,205,9,1.8,15]],u:"Del sacro al trocánter mayor, bajo el glúteo mayor.",f:"Rotación externa de la cadera."},
+{n:"Tensor de la fascia lata",r:"mus",s:[["f",70,214,3.2,9,-10]],u:"Cara lateral de la cadera, hacia la banda iliotibial.",f:"Flexiona y abduce la cadera; estabiliza la rodilla."},
+{n:"Sartorio",r:"mus",s:[["f",83,255,2.6,50,-14]],u:"Cruza el muslo en diagonal, de la espina ilíaca a la cara medial de la tibia. El músculo más largo del cuerpo.",f:"Flexiona, abduce y rota externamente la cadera (postura de \"sastre\")."},
+{n:"Recto femoral",r:"mus",s:[["f",84,257,4.5,29,0]],u:"Centro del muslo anterior, de la pelvis a la rótula. Parte del cuádriceps.",f:"Extiende la rodilla y flexiona la cadera."},
+{n:"Vasto lateral",r:"mus",s:[["f",72,262,4.5,30,5]],u:"Cara lateral del muslo. Parte del cuádriceps.",f:"Extiende la rodilla."},
+{n:"Vasto medial",r:"mus",s:[["f",91,290,4.5,11,0]],u:"Cara medial del muslo, sobre la rodilla (\"lágrima\"). Parte del cuádriceps.",f:"Extiende la rodilla y estabiliza la rótula."},
+{n:"Vasto intermedio",r:"mus",d:1,s:[["f",82,262,4,24,0]],u:"Bajo el recto femoral, sobre el fémur. Parte del cuádriceps.",f:"Extiende la rodilla."},
+{n:"Pectíneo",r:"mus",s:[["f",92,210,3.2,5,-30]],u:"Ingle, del pubis al fémur.",f:"Aduce y flexiona la cadera."},
+{n:"Aductor largo",r:"mus",s:[["f",93,229,3.5,13,-20]],u:"Cara interna del muslo, del pubis al fémur.",f:"Aduce el muslo (juntar las piernas)."},
+{n:"Aductor mayor",r:"mus",d:1,s:[["f",93,248,4,24,0],["b",95,245,3,22,0]],u:"Cara interna profunda del muslo, del isquion y pubis al fémur.",f:"Aduce el muslo; su parte posterior extiende la cadera."},
+{n:"Grácil",r:"mus",s:[["f",97.5,262,2,34,-4]],u:"Borde más interno del muslo, del pubis a la tibia.",f:"Aduce la cadera y flexiona la rodilla."},
+{n:"Bíceps femoral",r:"mus",s:[["b",74,262,4.5,31,5]],u:"Cara posterior-lateral del muslo, al peroné. Isquiotibial.",f:"Flexiona la rodilla y extiende la cadera."},
+{n:"Semitendinoso",r:"mus",s:[["b",85,260,3.5,31,0]],u:"Cara posterior-medial del muslo, a la tibia. Isquiotibial.",f:"Flexiona la rodilla y extiende la cadera."},
+{n:"Semimembranoso",r:"mus",s:[["b",91.5,274,3,24,0]],u:"Bajo el semitendinoso, cara posterior-medial. Isquiotibial.",f:"Flexiona la rodilla y extiende la cadera."},
+// PIERNA Y PIE
+{n:"Tibial anterior",r:"pie",s:[["f",84,346,3.5,26,3]],u:"Frente de la pierna, junto a la tibia, al borde medial del pie.",f:"Dorsiflexiona el tobillo (levantar la punta del pie) e invierte el pie."},
+{n:"Extensor largo de los dedos",r:"pie",s:[["f",79,352,2,26,2]],u:"Pierna anterior, lateral al tibial anterior, hasta los dedos 2-5.",f:"Extiende los dedos y dorsiflexiona el tobillo."},
+{n:"Extensor largo del dedo gordo",r:"pie",d:1,s:[["f",83,382,1.4,12,0]],u:"Entre el tibial anterior y el extensor de los dedos.",f:"Extiende el dedo gordo."},
+{n:"Peroneo largo",r:"pie",s:[["f",75,338,2.5,18,4],["b",73,338,2.5,18,4]],u:"Cara lateral de la pierna; su tendón cruza la planta del pie.",f:"Evierte el pie y lo flexiona plantarmente."},
+{n:"Peroneo corto",r:"pie",s:[["f",76,375,1.8,12,4]],u:"Cara lateral de la pierna, bajo el peroneo largo, al 5.º metatarsiano.",f:"Evierte el pie."},
+{n:"Extensor corto de los dedos",r:"pie",s:[["f",84,416,4,2.5,0]],u:"Dorso del pie.",f:"Ayuda a extender los dedos del pie."},
+{n:"Poplíteo",r:"pie",d:1,s:[["b",86,314,5,2.5,-20]],u:"Detrás de la rodilla, del fémur a la tibia.",f:"\"Desbloquea\" la rodilla al iniciar la flexión."},
+{n:"Sóleo",r:"pie",s:[["b",85,368,7.5,15,0]],u:"Pantorrilla, bajo el gastrocnemio, al tendón de Aquiles.",f:"Flexión plantar (ponerse de puntillas), clave para estar de pie."},
+{n:"Gastrocnemio (gemelos)",r:"pie",s:[["b",85,335,8.5,20,0]],u:"Pantorrilla superficial, dos cabezas desde el fémur al tendón de Aquiles.",f:"Flexión plantar del tobillo y flexión de la rodilla (correr, saltar)."},
+{n:"Tibial posterior",r:"pie",d:1,s:[["b",85,362,2.5,18,0]],u:"Capa más profunda de la pantorrilla, hacia la planta del pie.",f:"Invierte el pie y sostiene el arco plantar."}
+];
+
+const NS="http://www.w3.org/2000/svg";
+const SIL=[
+ ["ellipse",{cx:100,cy:30,rx:17,ry:21}],
+ ["path",{d:"M90,46 L110,46 L112,68 L88,68 Z"}],
+ ["path",{d:"M88,66 C70,68 60,72 58,84 L62,130 C66,150 70,165 70,175 C68,185 64,195 64,205 L136,205 C136,195 132,185 130,175 C130,165 134,150 138,130 L142,84 C140,72 130,68 112,66 Z"}],
+];
+const SIDE=[
+ ["path",{d:"M62,72 C50,74 44,86 44,104 L40,160 L36,232 L50,232 L58,165 L66,120 Z"}],
+ ["ellipse",{cx:43,cy:248,rx:7,ry:15}],
+ ["path",{d:"M66,200 C62,240 68,290 74,312 C70,330 72,360 78,405 L92,405 C96,360 100,330 96,312 C99,280 101,240 100,205 Z"}],
+];
+function el(t,a,parent){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);parent&&parent.appendChild(e);return e}
+function drawSil(svg,back){
+ const g=el("g",{class:"sil"},svg);
+ SIL.forEach(([t,a])=>el(t,a,g));
+ [0,1].forEach(mir=>{const gg=el("g",mir?{transform:"translate(200,0) scale(-1,1)"}:{},g);SIDE.forEach(([t,a])=>el(t,a,gg));
+   el("path",{d:back?"M78,405 L92,405 L91,422 L79,422 Z":"M78,405 L92,405 L96,430 L74,430 Z"},gg);});
+}
+const svgs={f:document.getElementById("svgF"),b:document.getElementById("svgB")};
+drawSil(svgs.f,0);drawSil(svgs.b,1);
+const layer={f:{deep:el("g",{},svgs.f),sup:el("g",{},svgs.f)},b:{deep:el("g",{},svgs.b),sup:el("g",{},svgs.b)}};
+M.forEach((m,i)=>{m.i=i;m.els=[];
+ m.s.forEach(sh=>{const v=sh[0];const parent=layer[v][m.d?"deep":"sup"];
+  const sides=m.m===0?[0]:[0,1];
+  sides.forEach(mir=>{let e;
+   if(typeof sh[1]==="string") e=el("path",{d:sh[1]});
+   else{const[,cx,cy,rx,ry,rot]=sh;e=el("ellipse",{cx,cy,rx,ry,transform:`rotate(${rot} ${cx} ${cy})`});}
+   if(mir){const g=el("g",{transform:"translate(200,0) scale(-1,1)"},parent);g.appendChild(e);} else parent.appendChild(e);
+   e.setAttribute("class","m"+(m.d?" deep":""));
+   const t=el("title",{},e);t.textContent=m.n;
+   e.addEventListener("click",ev=>{ev.stopPropagation();select(i,false)});
+   m.els.push(e);});
+ });
+});
+
+// Lista por región
+const list=document.getElementById("list");
+Object.keys(R).forEach(k=>{
+ const ms=M.filter(m=>m.r===k);if(!ms.length)return;
+ const sec=document.createElement("section");sec.className="region";sec.dataset.r=k;
+ sec.innerHTML=`<h2>${R[k]} <small style="color:var(--mut);font-weight:400">(${ms.length})</small></h2>`;
+ const grid=document.createElement("div");grid.className="grid";
+ ms.forEach(m=>{const c=document.createElement("div");c.className="card";
+  c.innerHTML=`<b>${m.n}</b>${m.d?'<span class="d">PROFUNDO</span>':''}<p>${m.u}</p>`;
+  c.onclick=()=>select(m.i,true);m.card=c;grid.appendChild(c);});
+ sec.appendChild(grid);list.appendChild(sec);
+});
+
+let cur=-1;
+const info=document.getElementById("info");
+function select(i,scroll){
+ if(cur>=0){M[cur].els.forEach(e=>e.classList.remove("on"));M[cur].card.classList.remove("on");}
+ cur=i;const m=M[i];
+ m.els.forEach(e=>{e.classList.add("on");e.parentNode.appendChild(e)});
+ m.card.classList.add("on");
+ const vistas=[...new Set(m.s.map(s=>s[0]))].map(v=>v==="f"?"anterior":"posterior").join(" y ");
+ info.innerHTML=`<h2>${m.n}</h2><span class="tag">${R[m.r]}</span><span class="tag">${m.d?"Profundo":"Superficial"}</span><span class="tag">Vista ${vistas}</span>
+ <p><b>Ubicación:</b> ${m.u}</p><p><b>Función:</b> ${m.f}</p>`;
+ if(scroll)document.getElementById("bodies").scrollIntoView({behavior:"smooth",block:"start"});
+}
+document.getElementById("deep").addEventListener("change",e=>document.getElementById("bodies").classList.toggle("showdeep",e.target.checked));
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+document.getElementById("q").addEventListener("input",e=>{
+ const q=norm(e.target.value.trim());
+ document.querySelectorAll(".region").forEach(sec=>{let any=0;
+  M.filter(m=>m.r===sec.dataset.r).forEach(m=>{const ok=!q||norm(m.n+" "+m.u+" "+m.f).includes(q);m.card.style.display=ok?"":"none";if(ok)any=1});
+  sec.style.display=any?"":"none";});
+});
+</script>
+</body>
+</html>
